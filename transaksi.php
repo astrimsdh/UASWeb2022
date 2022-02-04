@@ -3,6 +3,20 @@
 	if($_SESSION['status']!="login"){
 		header("location:login.php?pesan=belum_login");
 	}
+
+    include 'koneksi.php';
+    $sql = "SELECT * FROM transaksi_astri ORDER BY id_transaksi DESC LIMIT 1";
+    $query = mysqli_query($koneksi, $sql);
+
+    $data = mysqli_fetch_assoc($query);
+    $no_transaksi = $data['id_transaksi'] + 1;
+
+    $sql = "SELECT * FROM user_astri WHERE username = 'kasir'";
+    $query = mysqli_query($koneksi, $sql);
+    $data = mysqli_fetch_assoc($query);
+    $nama = $data['nama_user'];
+    $id_user = $data['id_user'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -176,47 +190,95 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Data Masakan</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Transaksi Pembelian</h1>
                     </div>
 
                     <!-- Content Row -->
-                    <div class="row">
-                        <div class="col-sm">
-                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#TambahMasakanModal">Tambah Data Masakan</button>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Masukkan Transaksi
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="form-group row">
+                                            <label for="no_transaksi" class="col-sm-3 col-form-label">No Transaksi</label>
+                                            <div class="col-sm-9">
+                                            <input type="text" readonly class="form-control-plaintext" id="no_transaksi" value="<?= $no_transaksi; ?>" name="no_transaksi" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="nama_user" class="col-sm-3 col-form-label">Nama User</label>
+                                            <div class="col-sm-9" >
+                                            <input type="hidden" readonly class="form-control-plaintext" id="id_user" value="<?= $id_user; ?>" name="id_user">
+                                            <input type="text" readonly class="form-control-plaintext" id="nama_user" value="<?= $nama; ?>" name="nama_user" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="tanggal" class="col-sm-3 col-form-label">Tanggal</label>
+                                            <div class="col-sm-9">
+                                            <input type="text" readonly class="form-control-plaintext" id="tanggal" value="<?= date('Y-m-d') ?>" name="tanggal" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="nama_masakan" class="col-sm-3 col-form-label">Pilih Masakan</label>
+                                            <div class="col-sm-9">
+                                            <select name="nama_masakan" id="nama_masakan" class="form-control">
+                                                <option value="0">-- Pilih Masakan --</option>
+                                                <?php
+                                                    $no = 1;
+                                                    $qry = mysqli_query($koneksi, "SELECT * FROM masakan_astri");
+                                                    while($data=mysqli_fetch_assoc($qry))
+                                                    {
+                                                ?>
+                                                    <option data="<?= $data['nama_masakan'] ?>" value="<?= $data['id_masakan'];?>"><?= $data['nama_masakan'];?></option>
+                                                    
+                                                <?php } ?>
+                                            </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="Jumlah" class="col-sm-3 col-form-label">Jumlah</label>
+                                            <div class="col-sm-9">
+                                            <input type="number" class="form-control" id="jumlah" placeholder="jumlah" name="jumlah">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="harga" class="col-sm-3 col-form-label">Harga</label>
+                                            <div class="col-sm-9">
+                                            <input type="text" readonly class="form-control-plaintext" id="harga" value="" name="harga" disabled placeholder="Rp 0,-">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="total" class="col-sm-3 col-form-label">Total</label>
+                                            <div class="col-sm-9">
+                                            <input type="text" readonly class="form-control-plaintext" id="total" value="" name="total" disabled placeholder="Rp 0,-">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="card-footer">
+                                    <button id="proses" class="btn btn btn-primary">Proses</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nama Masakan</th>
+                                <th scope="col">Harga</th>
+                                <th scope="col">Jumlah</th>
+                                <th scope="col">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list_pesanan">
 
-                            <table class="table table-striped my-3">
-                                <thead>
-                                    <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Nama Masakan</th>
-                                    <th scope="col">Harga</th>
-                                    <th scope="col">Stok</th>
-                                    <th scope="col">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                        include 'koneksi.php';
-                                        $no = 1;
-                                        $data = mysqli_query($koneksi, "SELECT * FROM masakan_astri");
-                                        while($d = mysqli_fetch_assoc($data)){
-                                    ?>
-                                    <tr>
-                                    <th scope="row"><?php echo $no++; ?></th>
-                                    <td><?php echo $d['nama_masakan']; ?></td>
-                                    <td><?php echo $d['harga']; ?></td>
-                                    <td><?php echo $d['stok']; ?></td>
-                                    <td> 
-                                        <a href="hapusMasakan.php?id=<?php echo $d['id_masakan']; ?>">HAPUS</a>
-                                    </td>
-                                    </tr>
-                                    <?php } ?>
-                                </tbody>
+                            </tbody>
                             </table>
                         </div>
-
-                        
-                        
                     </div>
                     
 
@@ -247,61 +309,6 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="logout.php">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tambah Masakan Modal -->
-    <div class="modal fade" id="TambahMasakanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Tambah Masakan</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <form action="tambahMasakan.php" method="post">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="namaMasakan">Nama Masakan</label>
-                        <input type="text" class="form-control" id="namaMasakan" placeholder="Masukkan Nama Masakkan" name="nama_masakan">
-                    </div>
-                    <div class="form-group">
-                        <label for="harga">Harga</label>
-                        <input type="number" class="form-control" id="harga" placeholder="Masukkan Harga" name="harga">
-                    </div>
-                    <div class="form-group">
-                        <label for="stok">Stok</label>
-                        <input type="text" class="form-control" id="stok" placeholder="Masukkan Stok" name="stok">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <input type="submit" class="btn btn-primary" value="Kirim">
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Bootstrap core JavaScript-->
     <script src="assets/vendor/jquery/jquery.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -318,6 +325,70 @@
     <!-- Page level custom scripts -->
     <script src="assets/js/demo/chart-area-demo.js"></script>
     <script src="assets/js/demo/chart-pie-demo.js"></script>
+    <script src="assets/js/jquery.js"></script>
+    <script>
+        $(function() {
+            $('#nama_masakan').on('click', function(){
+                let id_masakan = $('#nama_masakan option:selected').attr('value');
+                $.ajax({
+                    url : 'getMasakan.php',
+                    data: {
+                        id: id_masakan
+                    },
+                    type: 'json',
+                    method: 'post',
+                    success: function(response){
+                        $('#harga').val(parseInt(response));
+                        console.log(response);
+                    }
+                })
+            })
+
+            $('#jumlah').on('change', function(){
+                let harga = $('#harga').val();
+                let jumlah = $('#jumlah').val();
+                let total = harga * jumlah;
+                $('#total').val(total);
+            })
+
+            let bayar_kasir = 0;
+            let order = [];
+            let no = 1;
+            $('#proses').on('click', function(){
+                let list = [];
+
+                // Ambil nilai input
+                let id_transaksi = $('#no_transaksi').val();
+                let id_masakan = $('#nama_masakan option:selected').attr('value');
+                let nama_masakan = $('#nama_masakan option:selected').attr('data');
+                let harga = $('#harga').val();
+                let jumlah = $('#jumlah').val();
+                let total = parseInt($('#total').val());
+
+                if(jumlah == ""){
+                    alert("Isi Terlebih dahulu Pesanan");
+                }else{
+                    $.ajax({
+                        url: 'tambahDetail.php',
+                        data: {
+                            id_transaksi: id_transaksi,
+                            id_masakan: id_masakan,
+                            nama_masakan: nama_masakan,
+                            harga: harga,
+                            jumlah: jumlah,
+                            total: total
+                        },
+                        method: 'post',
+                        dataType: 'json',
+                        success: function(data){
+                            console.log(data);
+                        }
+                    })
+                }
+            })
+
+        })
+    </script>
 
 </body>
 
