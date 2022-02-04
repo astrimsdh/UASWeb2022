@@ -182,7 +182,7 @@
                     <!-- Content Row -->
                     <div class="row">
                         <div class="col-sm">
-                            <button type="button" class="btn btn-secondary">Tambah Data Masakan</button>
+                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#TambahMasakanModal">Tambah Data Masakan</button>
 
                             <table class="table table-striped my-3">
                                 <thead>
@@ -191,15 +191,27 @@
                                     <th scope="col">Nama Masakan</th>
                                     <th scope="col">Harga</th>
                                     <th scope="col">Stok</th>
+                                    <th scope="col">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <?php
+                                        include 'koneksi.php';
+                                        $no = 1;
+                                        $data = mysqli_query($koneksi, "SELECT * FROM masakan_astri");
+                                        while($d = mysqli_fetch_assoc($data)){
+                                    ?>
                                     <tr>
-                                    <th scope="row">1</th>
-                                    <td>Classic Kebab</td>
-                                    <td>25000</td>
-                                    <td>66</td>
+                                    <th scope="row"><?php echo $no++; ?></th>
+                                    <td><?php echo $d['nama_masakan']; ?></td>
+                                    <td><?php echo $d['harga']; ?></td>
+                                    <td><?php echo $d['stok']; ?></td>
+                                    <td>
+                                        <a href="editMasakan.php?id=<?php echo $d['id_masakan']; ?>">EDIT</a> | 
+                                        <a href="hapusMasakan.php?id=<?php echo $d['id_masakan']; ?>">HAPUS</a>
+                                    </td>
                                     </tr>
+                                    <?php } ?>
                                 </tbody>
                             </table>
                         </div>
@@ -252,6 +264,41 @@
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                     <a class="btn btn-primary" href="logout.php">Logout</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambah Masakan Modal -->
+    <div class="modal fade" id="TambahMasakanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Tambah Masakan</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form action="tambahMasakan.php" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="namaMasakan">Nama Masakan</label>
+                        <input type="text" class="form-control" id="namaMasakan" placeholder="Masukkan Nama Masakkan" name="nama_masakan">
+                    </div>
+                    <div class="form-group">
+                        <label for="harga">Harga</label>
+                        <input type="number" class="form-control" id="harga" placeholder="Masukkan Harga" name="harga">
+                    </div>
+                    <div class="form-group">
+                        <label for="stok">Stok</label>
+                        <input type="text" class="form-control" id="stok" placeholder="Masukkan Stok" name="stok">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <input type="submit" class="btn btn-primary" value="Kirim">
+                </div>
+                </form>
             </div>
         </div>
     </div>
