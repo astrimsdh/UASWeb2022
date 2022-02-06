@@ -232,14 +232,14 @@
                                                     while($data=mysqli_fetch_assoc($qry))
                                                     {
                                                 ?>
-                                                    <option data="<?= $data['nama_masakan'] ?>" value="<?= $data['id_masakan'];?>"><?= $data['nama_masakan'];?></option>
+                                                    <option data="<?= $data['nama_masakan'];?>" value="<?= $data['id_masakan'];?>"><?= $data['nama_masakan'];?></option>
                                                     
                                                 <?php } ?>
                                             </select>
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label for="Jumlah" class="col-sm-3 col-form-label">Jumlah</label>
+                                            <label for="jumlah" class="col-sm-3 col-form-label">Jumlah</label>
                                             <div class="col-sm-9">
                                             <input type="number" class="form-control" id="jumlah" placeholder="jumlah" name="jumlah">
                                             </div>
@@ -264,24 +264,54 @@
                             </div>
                         </div>
                         <div class="col-6">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Nama Masakan</th>
-                                <th scope="col">Harga</th>
-                                <th scope="col">Jumlah</th>
-                                <th scope="col">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="list_pesanan">
+                            <div class="card">
+                                <div class="card-header">
+                                    Featured
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Nama Masakan</th>
+                                            <th scope="col">Harga</th>
+                                            <th scope="col">Jumlah</th>
+                                            <th scope="col">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="list_pesan">
 
-                            </tbody>
-                            </table>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-10 ">
+                                            Total
+                                        </div>
+                                        <div class="col-2">
+                                            <input type="text" class="form-control-plaintext " disabled placeholder="0" id="bayar">
+                                        </div>
+                                    </div>
+                                    <div class="row my-1">
+                                        <div class="col-9">
+                                            Bayar
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="text" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row my-3d-flex justify-content-center">
+                                        <div class="">
+                                            <button class="btn btn-secondary" id="batal_transaksi">Batal</button>
+                                            <button class="btn btn-primary" id="bayar_transaksi">Bayar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-
                 </div>
                 <!-- /.container-fluid -->
 
@@ -303,6 +333,26 @@
 
     </div>
     <!-- End of Page Wrapper -->
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="logout.php">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
@@ -364,12 +414,13 @@
                 let harga = $('#harga').val();
                 let jumlah = $('#jumlah').val();
                 let total = parseInt($('#total').val());
+                
 
                 if(jumlah == ""){
                     alert("Isi Terlebih dahulu Pesanan");
                 }else{
                     $.ajax({
-                        url: 'tambahDetail.php',
+                        url : 'tambahDetail.php',
                         data: {
                             id_transaksi: id_transaksi,
                             id_masakan: id_masakan,
@@ -378,15 +429,93 @@
                             jumlah: jumlah,
                             total: total
                         },
+                        type: 'json',
                         method: 'post',
-                        dataType: 'json',
-                        success: function(data){
-                            console.log(data);
+                        success: function(response){
+                            console.log(response);
                         }
                     })
+
+                    list.push({
+                        'id_masakan': id_masakan,
+                        'nama_masakan': nama_masakan,
+                        'harga': harga,
+                        'jumlah': jumlah,
+                        'total': total
+                    })
+
+                    bayar_kasir += total;
+                    $('#bayar').val(bayar_kasir);
+
+                    $.each(list, function(i,data){
+                        $('#list_pesan').append(`
+                            <tr>
+                                <td>`+ no++ +`</td>
+                                <td>`+ data.nama_masakan +`</td>
+                                <td>`+ data.harga +`</td>
+                                <td>`+ data.jumlah +`</td>
+                                <td>`+ data.total +`</td>
+                            </tr>
+                        `)
+                    })
+
+                    // Menghapus nilai
+                    $('#nama_masakan').val("");
+                    $('#harga').val("");
+                    $('#jumlah').val("");
+                    $('#total').val("");
+                    
+                }
+            })
+            $('#batal_transaksi').on('click', function(){
+                let id_transaksi = $('#no_transaksi').val();
+                let total_bayar = $('#bayar').val();
+
+                if(total_bayar == ""){
+                    alert("Tambah menu terlebih dahulu");
+                    console.log("oke")
+                }else{
+                    $.ajax({
+                        url: 'batalTransaksi.php',
+                        data: {
+                            id_transaksi: id_transaksi
+                        },
+                        method: 'post',
+                        type: 'json',
+                        success: function(data){
+                            alert("Transaksi Berhasil dibatalkan");
+                            window.location.reload();
+                        }
+                    })
+                    
                 }
             })
 
+            $('#bayar_transaksi').on('click', function(){
+                let id_user = $('#id_user').val();
+                let id = $('#no_transaksi').val();
+                let total_bayar = $('#bayar').val();
+
+                if(total_bayar == "") {
+                    alert("Tambah Menu Terlebih dahulu")
+                }else{
+                    $.ajax({
+                        url: 'bayarTransaksi.php',
+                        data: {
+                            id_user: id_user,
+                            total_bayar: total_bayar
+                        },
+                        method: 'post',
+                        dataType: 'json',
+                        success: function(data){
+                            
+                        }
+                    })
+                    alert("Berhasil Menambahkan Transaksi");
+                    window.location.reload();
+                    window.location.href = 'print.php?id=' + id
+                }
+            })
         })
     </script>
 

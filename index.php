@@ -3,6 +3,12 @@
 	if($_SESSION['status']!="login"){
 		header("location:login.php?pesan=belum_login");
 	}
+
+    include 'koneksi.php';
+    $sql = "SELECT SUM(total_bayar), COUNT(id_transaksi) FROM transaksi_astri";
+    $data = mysqli_query($koneksi, $sql);
+    while($d = mysqli_fetch_assoc($data)){
+    
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +55,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -190,7 +196,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 OMset</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 360.000,-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $d['SUM(total_bayar)'];?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -208,7 +214,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Profit</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 215.000,-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $d['SUM(total_bayar)']*30/100;?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -228,7 +234,7 @@
                                             </div>
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col-auto">
-                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">Rp 160.000,-</div>
+                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?= $d['SUM(total_bayar)']*70/100;?></div>
                                                 </div>
                                             </div>
                                             
@@ -249,7 +255,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Total Order</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $d['COUNT(id_transaksi)']?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -259,6 +265,7 @@
                     
 
                 </div>
+                <?php } ?>
                 <!-- /.container-fluid -->
 
             </div>
